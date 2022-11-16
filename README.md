@@ -1,4 +1,4 @@
-# Real Estate NFT DApp
+# getCryp - decentralized housing
 
 ## Technology Stack & Tools
 
