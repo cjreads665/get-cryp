@@ -29,11 +29,19 @@ contract Escrow {
         _;
     }
 
+      modifier onlyInspector() {
+        require(msg.sender == inspector, "only this address can perform inspection");
+        _;
+    }
+
     //creating a mapping(object)
     mapping(uint256 => bool) public isListed;
     mapping(uint256 => uint256) public purchasePrice;
     mapping(uint256 => uint256) public escrowAmount;
-    mapping(uint256 => address) public buyer;
+    mapping(uint256 => address) public buyer; // this contains key-value of nft: buyerAddress. basically tracks which nft belongs to whom(?)
+    mapping(uint256 => bool) public inspectionPassed;//this contains key-value pairs of nftId : ifInspectionPassedOrFailed
+    //this mapping will store the ids of nfts that will contain the approval of appraiser, inspector
+    mapping(uint256 => mapping(address => bool)) public approval;
 
     //the local varibales that will change the public ones when new instances are created
     constructor(
@@ -69,5 +77,22 @@ contract Escrow {
     function depositEarnest(uint256 _nftId) public payable onlyBuyer(_nftId) returns(bool){
         return(msg.value >= escrowAmount[_nftId]);
     }
+    
+    function updateInspectionStatus(uint256 _nftId, bool _passed) public onlyInspector {
+        inspectionPassed[_nftId] = _passed; 
+    }
+
+    function approveSale(uint _nftId) public {
+        approval[_nftId][msg.sender] = true; // approving the nft according to the ID for the callers that are inspectors,etc.
+    }
+
+    receive() external payable{}
+
+    function getBalance() public view returns(uint256){
+        //https://ethereum.stackexchange.com/questions/40018/what-is-addressthis-in-solidity
+        return address(this).balance;
+    }
+
+    
 
 }

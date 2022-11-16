@@ -90,4 +90,41 @@ describe("Escrow", () => {
       expect(result).to.be.equal(tokens(5));
     });
   });
+
+  describe("Deposits", () => {
+    it("updates contract balance", async () => {
+      //connecting buyer to the escrow contract and passing the nft id along with the tokens as escrow
+      const transaction = await escrow.connect(buyer).depositEarnest(1,{value : tokens(5)});
+      await transaction.wait();
+      const result = await escrow.getBalance();
+      expect(result).to.be.equal(tokens(5));
+    });
+  });
+
+  describe("Inspection", () => {
+    it("updates inspection status", async () => {
+      //connecting buyer to the escrow contract and passing the nft id along with the tokens as escrow
+      const transaction = await escrow.connect(inspector).updateInspectionStatus(1,true); //emulating that inspector passed the nft along with inspection result
+      await transaction.wait();
+      const result = await escrow.inspectionPassed(1) // inspectionPassed is the mapping that returns the status with nft id
+      expect(result).to.be.equal(true)
+    });
+  });
+
+  describe("Approval", () => {
+    it("updates approval status", async () => {
+      let transaction = await escrow.connect(buyer).approveSale(1); // buyer approving the sale for that nftId
+      await transaction.wait();
+      transaction = await escrow.connect(seller).approveSale(1); // buyer approving the sale for that nftId
+      await transaction.wait();
+      transaction = await escrow.connect(lender).approveSale(1); // buyer approving the sale for that nftId
+      await transaction.wait();
+      //check if the parties involved have all approved the transactions
+      expect(await escrow.approval(1,buyer.address)).to.be.equal(true);
+      expect(await escrow.approval(1,seller.address)).to.be.equal(true);
+      expect(await escrow.approval(1,lender.address)).to.be.equal(true);
+
+    });
+  });
+
 });
