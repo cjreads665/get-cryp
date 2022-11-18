@@ -127,4 +127,39 @@ describe("Escrow", () => {
     });
   });
 
+  describe("Sale", () => {
+    it("updates approval status", async () => {
+  beforeEach(async()=>{
+    let transaction = await escrow.connect(buyer).depositEarnest(1,{value : tokens(5)})
+    await transaction.wait()
+
+    transaction = await escrow.connect(inspector).updateInspectionStatus(1,true)
+    await transaction.wait()
+
+    transaction = await escrow.connect(buyer).approveSale(1)
+    await transaction.wait()
+
+    transaction = await escrow.connect(seller).approveSale(1)
+    await transaction.wait()
+
+    transaction = await escrow.connect(lender).approveSale(1) //lender will approve the sale 
+    await transaction.wait()
+
+    await lender.sendTransaction({to: escrow.address, value : tokens(5)}) //lender giving loan by sending to contract
+
+    transaction = await escrow.connect(seller).finalizeSale(1)
+    await transaction.wait()
+  })
+
+  it("updates balance to zero",async()=>{
+    expect(await escrow.getBalance()).to.be.equal(0);
+  })
+
+  it("updates ownership",async()=>{
+    expect(await realEstate.ownerOf(1)).to.be.equal(buyer.address);
+  })
+
+    });
+  });
+
 });
