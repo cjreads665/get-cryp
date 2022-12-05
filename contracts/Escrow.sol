@@ -62,7 +62,7 @@ contract Escrow {
         uint256 _purchasePrice,
         uint256 _escrowAmount
     ) public payable onlySeller {
-        //anyone can call this function. So as a safe keeping measure,
+        //anyone can call this function. So as a safe keeping measure, we have made it onlySeller modifiable
         //we'll have to approve it from the seller side before moving nft from the seller's side
         //take the nft address and the nft(using id) and transfer from owner to this contract add
         IERC721(nftAddress).transferFrom(msg.sender, address(this), _nftId);
